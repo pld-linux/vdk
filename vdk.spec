@@ -67,8 +67,8 @@ Biblioteki statyczne VDK.
 rm -f missing
 libtoolize --copy --force
 aclocal
-autoconf
-automake -a -c -f
+%{__autoconf}
+%{__automake}
 %configure \
 	--enable-static=yes
 %{__make}
