@@ -1,4 +1,4 @@
-%include        /usr/lib/rpm/macros.perl
+%include	/usr/lib/rpm/macros.perl
 Summary:	C++ Wrapper over GTK+ 2.0.x library
 Summary(pl):	Wrapper C++ dla GTK+ 2.0.x
 Name:		vdk
@@ -80,7 +80,7 @@ install -d $RPM_BUILD_ROOT/%{_examplesdir}/%{name}-%{version}
 	DESTDIR=$RPM_BUILD_ROOT \
 	m4datadir=%{_aclocaldir}
 
-cp -dpr example/* $RPM_BUILD_ROOT/%{_examplesdir}/%{name}-%{version}
+cp -dpr example/* $RPM_BUILD_ROOT%{_examplesdir}/%{name}-%{version}
 
 %clean
 rm -rf $RPM_BUILD_ROOT
