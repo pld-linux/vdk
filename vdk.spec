@@ -3,7 +3,7 @@ Summary:	C++ Wrapper over GTK+ 2.0.x library
 Summary(pl):	Wrapper C++ dla GTK+ 2.0.x
 Name:		vdk
 Version:	2.0.1
-Release:	1
+Release:	2
 License:	LGPL
 Group:		X11/Libraries
 Source0:	http://prdownloads.sourceforge.net/vdkbuilder/%{name}-%{version}.tar.gz
@@ -67,6 +67,7 @@ Biblioteki statyczne VDK.
 %configure \
 	--enable-static=yes
 %{__make}
+%{__make} docs
 
 %install
 rm -rf $RPM_BUILD_ROOT
@@ -92,7 +93,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files devel
 %defattr(644,root,root,755)
-%doc *.gz
+%doc *.gz doc/doxy/html
 %{_examplesdir}/%{name}-%{version}
 %attr(755,root,root) %{_libdir}/lib*.so
 %attr(755,root,root) %{_libdir}/lib*.la
