@@ -7,18 +7,17 @@ Release:	2
 License:	LGPL
 Group:		X11/Libraries
 Source0:	http://prdownloads.sourceforge.net/vdkbuilder/%{name}-%{version}.tar.gz
+Patch0:		%{name}-ac_am_fixes.patch
 URL:		http://vdkbuilder.sourceforge.net/
-BuildRequires:	atk-devel >= 1.0.0
 BuildRequires:	autoconf
+BuildRequires:	automake
 BuildRequires:	doxygen
 BuildRequires:	freetype-devel
-BuildRequires:	glib2-devel >= 2.0.0
 BuildRequires:	gtk+2-devel >= 2.0.0
 BuildRequires:	imlib-devel
 BuildRequires:	libsigc++-devel >= 1.0.0
 BuildRequires:	libstdc++-devel
-BuildRequires:	pango-devel >= 1.0.0
-BuildRequires:	perl
+BuildRequires:	libtool
 BuildRequires:	perl >= 5.6
 BuildRequires:	pkgconfig
 BuildRequires:	rpm-perlprov >= 3.0.3-16
@@ -61,9 +60,15 @@ Biblioteki statyczne VDK.
 
 %prep
 %setup -q
+%patch0 -p1
 
 %build
 # exceptions and rtti are used in this package --misiek
+rm -f missing
+libtoolize --copy --force
+aclocal
+autoconf
+automake -a -c -f
 %configure \
 	--enable-static=yes
 %{__make}
