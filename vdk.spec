@@ -24,8 +24,6 @@ BuildRequires:	rpm-perlprov >= 3.0.3-16
 BuildRequires:	zlib-devel
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
-%define		_prefix		/usr/X11R6
-%define		_mandir		%{_prefix}/man
 
 %description
 C++ Wrapper over GTK+ 2.0.x library.
