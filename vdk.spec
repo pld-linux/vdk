@@ -7,6 +7,7 @@ Release:	3
 License:	LGPL
 Group:		X11/Libraries
 Source0:	http://dl.sourceforge.net/vdkbuilder/%{name}-%{version}.tar.gz
+# Source0-md5:	d65303f485b9dee8dcedf18233db7569
 Patch0:		%{name}-ac_am_fixes.patch
 URL:		http://vdkbuilder.sourceforge.net/
 BuildRequires:	autoconf
