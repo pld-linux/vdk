@@ -99,7 +99,7 @@ rm -rf $RPM_BUILD_ROOT
 %doc README ChangeLog AUTHORS NEWS BUGS TODO doc/doxy/html
 %{_examplesdir}/%{name}-%{version}
 %attr(755,root,root) %{_libdir}/lib*.so
-%attr(755,root,root) %{_libdir}/lib*.la
+%{_libdir}/lib*.la
 %attr(755,root,root) %{_bindir}/*
 %{_aclocaldir}/*.m4
 %{_includedir}/vdk2
