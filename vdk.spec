@@ -6,7 +6,7 @@ Version:	2.0.1
 Release:	3
 License:	LGPL
 Group:		X11/Libraries
-Source0:	http://prdownloads.sourceforge.net/vdkbuilder/%{name}-%{version}.tar.gz
+Source0:	http://dl.sourceforge.net/vdkbuilder/%{name}-%{version}.tar.gz
 Patch0:		%{name}-ac_am_fixes.patch
 URL:		http://vdkbuilder.sourceforge.net/
 BuildRequires:	autoconf
@@ -23,7 +23,6 @@ BuildRequires:	pkgconfig
 BuildRequires:	rpm-perlprov >= 3.0.3-16
 BuildRequires:	zlib-devel
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
-
 
 %description
 C++ Wrapper over GTK+ 2.0.x library.
