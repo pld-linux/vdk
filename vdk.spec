@@ -11,6 +11,7 @@ URL:		http://vdkbuilder.sourceforge.net/
 BuildRequires:	atk-devel >= 1.0.0
 BuildRequires:	autoconf
 BuildRequires:	doxygen
+BuildRequires:	freetype-devel
 BuildRequires:	glib2-devel >= 2.0.0
 BuildRequires:	gtk+2-devel >= 2.0.0
 BuildRequires:	imlib-devel
@@ -19,6 +20,7 @@ BuildRequires:	libstdc++-devel
 BuildRequires:	pango-devel >= 1.0.0
 BuildRequires:	perl
 BuildRequires:	perl >= 5.6
+BuildRequires:	pkgconfig
 BuildRequires:	rpm-perlprov >= 3.0.3-16
 BuildRequires:	zlib-devel
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
