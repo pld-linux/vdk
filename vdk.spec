@@ -14,7 +14,7 @@ BuildRequires:	autoconf
 BuildRequires:	automake
 BuildRequires:	doxygen
 BuildRequires:	freetype-devel >= 2.0.0
-BuildRequires:	gtk+2-devel >= 2.0.0
+BuildRequires:	gtk+2-devel >= 1:2.0.0
 BuildRequires:	imlib-devel
 BuildRequires:	libsigc++12-devel >= 1.0.0
 BuildRequires:	libstdc++-devel
