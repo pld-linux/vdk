@@ -65,7 +65,7 @@ Biblioteki statyczne VDK.
 %build
 # exceptions and rtti are used in this package --misiek
 rm -f missing
-libtoolize --copy --force
+%{__libtoolize}
 aclocal
 %{__autoconf}
 %{__automake}
