@@ -1,0 +1,1551 @@
+diff -burN vdk-2.0.3-oryg/configure.in vdk-2.0.3/configure.in
+--- vdk-2.0.3-oryg/configure.in	2003-05-17 06:54:19.000000000 +0200
++++ vdk-2.0.3/configure.in	2004-04-09 22:54:29.000000000 +0200
+@@ -174,8 +174,6 @@
+ dnl ==========================
+ dnl user configurable options
+ dnl ==========================
+-AC_ARG_ENABLE(debug,   [  --enable-debug=[no/minimum/yes]  enable debug information [default=no]],,enable_debug=no)
+-AC_ARG_ENABLE(opt,     [  --enable-opt=[OPTIMIZATION/no]  Compile with -Ox optimization [default=2]],,enable_opt=2)
+ AC_ARG_ENABLE(testvdk, [  --enable-testvdk=[yes/no] Compile testvdk program example [default=yes]],,enable_testvdk=yes)
+ AC_ARG_ENABLE(sigc, [  --enable-sigc=[yes/no] Enable libsigc++-extension [default=no]],,enable_sigc=no)
+ AC_ARG_ENABLE(testsigc, [  --enable-testsigc=[yes/no] Compile testsigcvdk program [default=no]],,enable_testsigc=no)
+@@ -194,20 +192,12 @@
+ 
+ if test "x$enable_debug" = "xminimum"; then
+   AC_DEFINE(VDKDEBUG)
+-  CXXFLAGS="-s"
+ else
+   if test "x$enable_debug" = "xyes"; then
+     AC_DEFINE(VDKDEBUG)
+-    CXXFLAGS="-g"
+-  else
+-    CXXFLAGS="-s"
+   fi
+ fi
+ 
+-if test "x$enable_opt" != "xno"; then
+-  CXXFLAGS="$CXXFLAGS -O$enable_opt"
+-fi
+-
+ if test "x$enable_testvdk" = "xyes"; then
+   TESTVDK="testvdk"
+ else
+@@ -296,14 +286,7 @@
+ 
+ CXXFLAGS="$CXXFLAGS -Wall -Wcast-qual -Woverloaded-virtual -Wconversion -Wstrict-prototypes -Winline"
+ 
+-AC_SUBST(CXXFLAGS)
+-
+-INCLUDES="$GTK_CFLAGS $SIGC_CFLAGS $SIGCDEFINE"
+-
+-
+-
+-AC_SUBST(INCLUDES)
+-
++INCLUDES="$GTK_CFLAGS $SIGC_CFLAGS $GNOME_CFLAGS $SIGCDEFINE $GNOMEDEFINE"
+ 
+ 
+ dnl	  contrib/Makefile 
+diff -burN vdk-2.0.3-oryg/configure.in~ vdk-2.0.3/configure.in~
+--- vdk-2.0.3-oryg/configure.in~	1970-01-01 01:00:00.000000000 +0100
++++ vdk-2.0.3/configure.in~	2004-04-09 22:51:14.000000000 +0200
+@@ -0,0 +1,345 @@
++dnl configure.in for VDK
++AC_PREREQ(2.52)
++AC_INIT(vdk/vdk.h)
++
++cflags_set=${CFLAGS+set}
++
++VDK_VERSION_MAJOR=2
++VDK_VERSION_MINOR=0
++VDK_VERSION_MICRO=3
++
++
++dnl put the right date here as we release a new version
++VDK_RELEASE_DATE="02-25-2003"
++
++VDK_VERSION=$VDK_VERSION_MAJOR.$VDK_VERSION_MINOR.$VDK_VERSION_MICRO
++
++AC_SUBST(VDK_VERSION_MAJOR)
++AC_SUBST(VDK_VERSION_MINOR)
++AC_SUBST(VDK_VERSION_MICRO)
++AC_SUBST(VDK_VERSION)
++AC_SUBST(VDK_RELEASE_DATE)
++
++dnl Libtool
++LT_VDK_RELEASE=$VDK_VERSION_MAJOR.$VDK_VERSION_MINOR
++LT_VDK_CURRENT=`expr $VDK_VERSION_MAJOR + $VDK_VERSION_MINOR`
++LT_VDK_REVISION=$VDK_VERSION_MICRO
++LT_VDK_AGE=$VDK_VERSION_MINOR
++AC_SUBST(LT_VDK_RELEASE)
++AC_SUBST(LT_VDK_CURRENT)
++AC_SUBST(LT_VDK_REVISION)
++AC_SUBST(LT_VDK_AGE)
++
++dnl For Automake
++VERSION=$VDK_VERSION
++PACKAGE=vdk
++
++dnl Initialize automake stuff
++AM_INIT_AUTOMAKE($PACKAGE, $VERSION)
++AC_CANONICAL_HOST
++
++
++dnl Initialize Libtool
++AM_PROG_LIBTOOL
++AM_MAINTAINER_MODE
++
++
++AC_PROG_CXX
++AC_PROG_CXXCPP
++AC_LANG_CPLUSPLUS
++AC_SUBST(LIBS)
++AC_SUBST(CFLAGS)
++
++
++AC_PATH_PROG(PKG_CONFIG, pkg-config, no)
++if test x$PKG_CONFIG = xno ; then
++  AC_MSG_ERROR([*** pkg-config not found. See http://pkgconfig.sourceforge.net])
++fi
++
++if ! pkg-config --atleast-pkgconfig-version 0.8 ; then
++   AC_MSG_ERROR([*** pkg-config too old; version 0.8 or better required.])
++fi
++echo "checking if an updated version of gtk+ is installed"
++if $PKG_CONFIG --atleast-version 2.0.0 gtk+-2.0 ; then
++        GTK_CFLAGS=`$PKG_CONFIG --cflags gtk+-2.0`
++        GTK_LIBS=`$PKG_CONFIG --libs gtk+-2.0`
++        GTK_DEPLIBS=$GTK_LIBS
++#        AC_MSG_RESULT($GTK_CFLAGS $GTK_LIBS)
++	echo " gtk+ version:" + `pkg-config gtk+-2.0 --modversion`
++ else
++        AC_MSG_ERROR([
++*** GTK+ 2.0.0 or newer is required. The latest version of GTK
++*** is available from http://gtk.org/
++*** or get latest cvs at http://gnome.org:
++  ])
++  fi
++
++AC_SUBST(GTK_CFLAGS)
++AC_SUBST(GTK_LIBS)
++
++
++dnl Now check C++ compiler
++
++AC_MSG_CHECKING(if C++ compiler supports bool (required))
++AC_TRY_COMPILE(
++[
++],[
++   bool b=true;
++   bool b1=false;
++],[
++  ac_bool=yes
++],[
++  config_error=yes
++  AC_WARN(bool type is not supported by your compiler)
++])
++AC_MSG_RESULT([$ac_bool])
++
++AC_MSG_CHECKING(if C++ compiler supports templates well enough (required))
++AC_TRY_LINK(
++[
++class foo { public: int a(float,int,int,foo*,foo**) { return 0; } };
++template<class rettype, class T, class P1, class P2, class P3, class P4, class P5>
++class k { 	
++public:
++   rettype (T::*method)(P1,P2,P3,P4,P5);
++};
++],[
++  k<int,foo,float,int,int,foo*,foo**> a;
++],[
++  ac_vdk_template_support_well=yes
++],[
++  ac_vdk_template_support_well=no
++  config_error=yes
++  AC_WARN(your C++ compiler does not support templates well enough)
++])
++AC_MSG_RESULT([$ac_vdk_template_support_well])
++
++AC_MSG_CHECKING(if C++ environment has working auto_ptr<>)
++AC_TRY_COMPILE(
++[
++#include <memory>
++],[
++  std::auto_ptr<int> a;
++],[
++  vdk_autoptr_ok=yes
++  AC_DEFINE(HAVE_AUTO_PTR)
++],[
++  vdk_autoptr_ok=no
++])
++AC_MSG_RESULT([$vdk_autoptr_ok])
++
++AC_MSG_CHECKING(if C++ environment has working string class (required))
++AC_TRY_LINK(
++[
++#include <string>
++  using namespace std;
++  class foo {
++  public:
++    void f(const string &s);
++  };
++  void foo::f(const string &s) {
++    f(s.c_str());
++  }
++],[
++   foo f1;
++   f1.f("test");
++],[
++  vdk_string_ok=yes
++],[
++  vdk_string_ok=no
++  config_error=yes
++  AC_WARN(C++ compilers string support does not work)
++])
++AC_MSG_RESULT([$vdk_string_ok])
++
++AC_MSG_CHECKING(if C++ environment provides all required features)
++if test "x$config_error" = xyes ; then
++  AC_MSG_RESULT([no])
++  AC_MSG_ERROR([Your compiler is not powerful enough to compile VDK. If it should be, see config.log for more information of why it failed.])
++fi
++AC_MSG_RESULT([yes])
++
++dnl check if doxygen is installed
++AC_PATH_PROG(DOXYGEN, doxygen)
++AC_PATH_PROG(PERL, perl)
++
++dnl added by Raff
++dnl you must tell your programs that DOXYGEN exists
++AC_SUBST(DOXYGEN)
++AC_SUBST(PERL)
++
++dnl AM_CONFIG_HEADER(./include/vdk/vdkfeatures.h:./include/vdk/vdkfeatures.h.in)
++AM_CONFIG_HEADER(config.h)
++
++dnl ==========================
++dnl user configurable options
++dnl ==========================
++AC_ARG_ENABLE(testvdk, [  --enable-testvdk=[yes/no] Compile testvdk program example [default=yes]],,enable_testvdk=yes)
++AC_ARG_ENABLE(sigc, [  --enable-sigc=[yes/no] Enable libsigc++-extension [default=no]],,enable_sigc=no)
++AC_ARG_ENABLE(testsigc, [  --enable-testsigc=[yes/no] Compile testsigcvdk program [default=no]],,enable_testsigc=no)
++
++dnl waiting for gnome support to gtk+2.0
++dnl gnome support
++dnl AC_ARG_ENABLE(gnome,
++dnl [  --enable-gnome=[yes/no]      enable use of gnome[default=no]],
++dnl	gnome=$enableval, gnome=no)
++
++
++dnl doxygen options
++AC_ARG_ENABLE(doc-html,  [ --enable-doc-html[=yes/no] enable generation of docs in html format [default=yes]],,enable_doc_html=yes)
++AC_ARG_ENABLE(doc-latex, [ --enable-doc-latex[=yes/no] enable generation of docs in latex format [default=no]],,enable_doc_latex=no)
++AC_ARG_ENABLE(doc-man,   [ --enable-doc-man[=yes/no] enable generation of docs in latex format [default=no]],,enable_doc_man=no)
++
++if test "x$enable_debug" = "xminimum"; then
++  AC_DEFINE(VDKDEBUG)
++else
++  if test "x$enable_debug" = "xyes"; then
++    AC_DEFINE(VDKDEBUG)
++  fi
++fi
++
++if test "x$enable_testvdk" = "xyes"; then
++  TESTVDK="testvdk"
++else
++  TESTVDK=""
++fi
++
++AC_SUBST(TESTVDK)
++
++dnl anyhow we have to add -lpthread
++if test "x$enable_sigc" = "xyes" && test "$SIGC_LIBS"!=""; then
++dnl earlier versions of libsigc++ might also work (>= 0.85)
++	AM_PATH_SIGC(1.0.0,,
++	     AC_MSG_WARN(Couldn't find libgsigc++ VDK will be build without it))
++	LIBS="$LIBS $SIGC_LIBS"
++	CFLAGS="$CFLAGS $SIGC_CFLAGS"
++	CXXFLAGS="$CXXFLAGS $SIGC_CFLAGS"
++	SIGCDEFINE="-DUSE_SIGCPLUSPLUS"
++	WITHSIGC="yes"
++else
++	SIGCDEFINE=""
++	SIGC_CFLAGS=""
++	SIGC_LIBS="-lpthread"
++	WITHSIGC="no"
++fi
++
++AC_SUBST(SIGCDEFINE)
++
++
++if test "x$enable_testsigc" = "xyes" && test "$SIGCDEFINE" != ""; then
++	TESTSIGCVDK="testsigcvdk"
++	WITHTESTSIGCVDK="yes"	
++else
++	TESTSIGCVDK=""
++	WITHTESTSIGCVDK="no"	
++fi
++
++AC_SUBST(TESTSIGCVDK)
++
++dnl doxygen support
++
++if test "x$enable_doc_html" = "xyes"; then
++	GENERATE_HTML=YES
++	TAG_SIGC=USE_SIGCPLUSPLUS
++else
++	GENERATE_HTML=NO
++	TAG_SIGC=""
++fi
++
++if test "x$enable_devel" = "xyes"; then
++  cflag="-g"
++fi
++
++if test "x$enable_doc_latex" = "xyes"; then
++	GENERATE_LATEX=YES
++	TAG_SIGC=USE_SIGCPLUSPLUS
++else
++	GENERATE_LATEX=NO
++fi
++
++if test "x$enable_doc_man" = "xyes"; then
++	GENERATE_MAN=YES
++	TAG_SIGC=USE_SIGCPLUSPLUS
++else
++	GENERATE_MAN=NO
++
++fi
++
++AC_SUBST(GENERATE_HTML)
++AC_SUBST(GENERATE_LATEX)
++AC_SUBST(GENERATE_MAN)
++AC_SUBST(TAG_SIGC)
++
++
++GNOMEDEFINE=""
++GNOME_CFLAGS=""
++GNOME_LIBS=""
++GNOME_VDK=""
++
++AC_SUBST(GNOMEDEFINE)
++AC_SUBST(GNOME_LIBS)
++AC_SUBST(GNOME_CFLAGS)
++AC_SUBST(GNOME_VDK)
++
++# just to be fully gtk2.x compliant...
++dnlCXXFLAGS="$CXXFLAGS -DGTK_DISABLE_DEPRECATED -Wall -Wcast-qual -Woverloaded-virtual -Wconversion -Wstrict-prototypes -Winline"
++
++CXXFLAGS="$CXXFLAGS -Wall -Wcast-qual -Woverloaded-virtual -Wconversion -Wstrict-prototypes -Winline"
++
++INCLUDES="$GTK_CFLAGS $SIGC_CFLAGS $SIGCDEFINE"
++
++
++dnl	  contrib/Makefile 
++dnl	  testvdk/pixmap/Makefile 
++dnl	  sigcvdktest/Makefile 
++dnl       vdk.spec \
++
++AC_OUTPUT([Makefile \
++	vdk/Makefile \
++	vdk/vdkfeatures.h \
++	testvdk/Makefile \
++	sigcvdktest/Makefile \
++	example/Makefile \
++	doc/Makefile \
++	doc/doxy/Makefile \
++	doc/doxy/Doxyfile \
++	vdk-2.m4 \
++	vdk-config-2], \
++	[chmod +x vdk-config-2])	
++
++if test -z $DOXYGEN; then
++	echo "*****************************************************"; 
++	echo "* doxygen was not found, i will not be able to      *"; 
++	echo "* generate the docs by myself.                      *"; 
++	echo "* Doxygen is recommended, please check:             *"; 
++	echo "* http://www.doxygen.org/download.html              *"; 
++	echo "* for the latest version of doxygen.                *";  
++	echo "*****************************************************";
++	WITHDOCHTML="no"
++else
++	WITHDOCHTML="yes"
++fi
++
++echo ""
++echo "VDK configure finished"
++echo "VDK configuration:"
++echo " 	- Version      			    : $VERSION"
++echo " 	- Make static lib		    : $enable_static"
++echo " 	- Make vdk test program		    : $enable_testvdk"
++echo " 	- Libsigc++ signal extension support: $WITHSIGC"
++echo " 	- Make signal extension test program: $WITHTESTSIGCVDK"
++if test "x$WITHSIGC" = "xyes"; then
++echo	"**************************************************************"
++echo	"You have choosed to use Libsigc++ with VDK which is"
++echo	"deprecated and will be unsupported in the near future"
++echo	"**************************************************************"
++fi
++echo " 	- Gnome support			    : $WITHGNOME"
++echo " 	- Debug        			    : $enable_debug"
++echo " 	- Optimization 			    : $enable_opt"
++echo " 	- Make docs on html format	    : $WITHDOCHTML"
++echo " 	* Host                              : $host"
++echo " 	* Installation Prefix               : $prefix"
++echo " 	* Compiler version                  :" `g++ --version`
++echo " 	* Target machine                    :" `c++ -dumpmachine`
++#echo " 	* CPU                               :" `cat /proc/cpuinfo`
+diff -burN vdk-2.0.3-oryg/configure.in-oryg vdk-2.0.3/configure.in-oryg
+--- vdk-2.0.3-oryg/configure.in-oryg	1970-01-01 01:00:00.000000000 +0100
++++ vdk-2.0.3/configure.in-oryg	2004-04-09 22:40:13.000000000 +0200
+@@ -0,0 +1,362 @@
++dnl configure.in for VDK
++AC_PREREQ(2.52)
++AC_INIT(vdk/vdk.h)
++
++cflags_set=${CFLAGS+set}
++
++VDK_VERSION_MAJOR=2
++VDK_VERSION_MINOR=0
++VDK_VERSION_MICRO=3
++
++
++dnl put the right date here as we release a new version
++VDK_RELEASE_DATE="02-25-2003"
++
++VDK_VERSION=$VDK_VERSION_MAJOR.$VDK_VERSION_MINOR.$VDK_VERSION_MICRO
++
++AC_SUBST(VDK_VERSION_MAJOR)
++AC_SUBST(VDK_VERSION_MINOR)
++AC_SUBST(VDK_VERSION_MICRO)
++AC_SUBST(VDK_VERSION)
++AC_SUBST(VDK_RELEASE_DATE)
++
++dnl Libtool
++LT_VDK_RELEASE=$VDK_VERSION_MAJOR.$VDK_VERSION_MINOR
++LT_VDK_CURRENT=`expr $VDK_VERSION_MAJOR + $VDK_VERSION_MINOR`
++LT_VDK_REVISION=$VDK_VERSION_MICRO
++LT_VDK_AGE=$VDK_VERSION_MINOR
++AC_SUBST(LT_VDK_RELEASE)
++AC_SUBST(LT_VDK_CURRENT)
++AC_SUBST(LT_VDK_REVISION)
++AC_SUBST(LT_VDK_AGE)
++
++dnl For Automake
++VERSION=$VDK_VERSION
++PACKAGE=vdk
++
++dnl Initialize automake stuff
++AM_INIT_AUTOMAKE($PACKAGE, $VERSION)
++AC_CANONICAL_HOST
++
++
++dnl Initialize Libtool
++AM_PROG_LIBTOOL
++AM_MAINTAINER_MODE
++
++
++AC_PROG_CXX
++AC_PROG_CXXCPP
++AC_LANG_CPLUSPLUS
++AC_SUBST(LIBS)
++AC_SUBST(CFLAGS)
++
++
++AC_PATH_PROG(PKG_CONFIG, pkg-config, no)
++if test x$PKG_CONFIG = xno ; then
++  AC_MSG_ERROR([*** pkg-config not found. See http://pkgconfig.sourceforge.net])
++fi
++
++if ! pkg-config --atleast-pkgconfig-version 0.8 ; then
++   AC_MSG_ERROR([*** pkg-config too old; version 0.8 or better required.])
++fi
++echo "checking if an updated version of gtk+ is installed"
++if $PKG_CONFIG --atleast-version 2.0.0 gtk+-2.0 ; then
++        GTK_CFLAGS=`$PKG_CONFIG --cflags gtk+-2.0`
++        GTK_LIBS=`$PKG_CONFIG --libs gtk+-2.0`
++        GTK_DEPLIBS=$GTK_LIBS
++#        AC_MSG_RESULT($GTK_CFLAGS $GTK_LIBS)
++	echo " gtk+ version:" + `pkg-config gtk+-2.0 --modversion`
++ else
++        AC_MSG_ERROR([
++*** GTK+ 2.0.0 or newer is required. The latest version of GTK
++*** is available from http://gtk.org/
++*** or get latest cvs at http://gnome.org:
++  ])
++  fi
++
++AC_SUBST(GTK_CFLAGS)
++AC_SUBST(GTK_LIBS)
++
++
++dnl Now check C++ compiler
++
++AC_MSG_CHECKING(if C++ compiler supports bool (required))
++AC_TRY_COMPILE(
++[
++],[
++   bool b=true;
++   bool b1=false;
++],[
++  ac_bool=yes
++],[
++  config_error=yes
++  AC_WARN(bool type is not supported by your compiler)
++])
++AC_MSG_RESULT([$ac_bool])
++
++AC_MSG_CHECKING(if C++ compiler supports templates well enough (required))
++AC_TRY_LINK(
++[
++class foo { public: int a(float,int,int,foo*,foo**) { return 0; } };
++template<class rettype, class T, class P1, class P2, class P3, class P4, class P5>
++class k { 	
++public:
++   rettype (T::*method)(P1,P2,P3,P4,P5);
++};
++],[
++  k<int,foo,float,int,int,foo*,foo**> a;
++],[
++  ac_vdk_template_support_well=yes
++],[
++  ac_vdk_template_support_well=no
++  config_error=yes
++  AC_WARN(your C++ compiler does not support templates well enough)
++])
++AC_MSG_RESULT([$ac_vdk_template_support_well])
++
++AC_MSG_CHECKING(if C++ environment has working auto_ptr<>)
++AC_TRY_COMPILE(
++[
++#include <memory>
++],[
++  std::auto_ptr<int> a;
++],[
++  vdk_autoptr_ok=yes
++  AC_DEFINE(HAVE_AUTO_PTR)
++],[
++  vdk_autoptr_ok=no
++])
++AC_MSG_RESULT([$vdk_autoptr_ok])
++
++AC_MSG_CHECKING(if C++ environment has working string class (required))
++AC_TRY_LINK(
++[
++#include <string>
++  using namespace std;
++  class foo {
++  public:
++    void f(const string &s);
++  };
++  void foo::f(const string &s) {
++    f(s.c_str());
++  }
++],[
++   foo f1;
++   f1.f("test");
++],[
++  vdk_string_ok=yes
++],[
++  vdk_string_ok=no
++  config_error=yes
++  AC_WARN(C++ compilers string support does not work)
++])
++AC_MSG_RESULT([$vdk_string_ok])
++
++AC_MSG_CHECKING(if C++ environment provides all required features)
++if test "x$config_error" = xyes ; then
++  AC_MSG_RESULT([no])
++  AC_MSG_ERROR([Your compiler is not powerful enough to compile VDK. If it should be, see config.log for more information of why it failed.])
++fi
++AC_MSG_RESULT([yes])
++
++dnl check if doxygen is installed
++AC_PATH_PROG(DOXYGEN, doxygen)
++AC_PATH_PROG(PERL, perl)
++
++dnl added by Raff
++dnl you must tell your programs that DOXYGEN exists
++AC_SUBST(DOXYGEN)
++AC_SUBST(PERL)
++
++dnl AM_CONFIG_HEADER(./include/vdk/vdkfeatures.h:./include/vdk/vdkfeatures.h.in)
++AM_CONFIG_HEADER(config.h)
++
++dnl ==========================
++dnl user configurable options
++dnl ==========================
++AC_ARG_ENABLE(debug,   [  --enable-debug=[no/minimum/yes]  enable debug information [default=no]],,enable_debug=no)
++AC_ARG_ENABLE(opt,     [  --enable-opt=[OPTIMIZATION/no]  Compile with -Ox optimization [default=2]],,enable_opt=2)
++AC_ARG_ENABLE(testvdk, [  --enable-testvdk=[yes/no] Compile testvdk program example [default=yes]],,enable_testvdk=yes)
++AC_ARG_ENABLE(sigc, [  --enable-sigc=[yes/no] Enable libsigc++-extension [default=no]],,enable_sigc=no)
++AC_ARG_ENABLE(testsigc, [  --enable-testsigc=[yes/no] Compile testsigcvdk program [default=no]],,enable_testsigc=no)
++
++dnl waiting for gnome support to gtk+2.0
++dnl gnome support
++dnl AC_ARG_ENABLE(gnome,
++dnl [  --enable-gnome=[yes/no]      enable use of gnome[default=no]],
++dnl	gnome=$enableval, gnome=no)
++
++
++dnl doxygen options
++AC_ARG_ENABLE(doc-html,  [ --enable-doc-html[=yes/no] enable generation of docs in html format [default=yes]],,enable_doc_html=yes)
++AC_ARG_ENABLE(doc-latex, [ --enable-doc-latex[=yes/no] enable generation of docs in latex format [default=no]],,enable_doc_latex=no)
++AC_ARG_ENABLE(doc-man,   [ --enable-doc-man[=yes/no] enable generation of docs in latex format [default=no]],,enable_doc_man=no)
++
++if test "x$enable_debug" = "xminimum"; then
++  AC_DEFINE(VDKDEBUG)
++  CXXFLAGS="-s"
++else
++  if test "x$enable_debug" = "xyes"; then
++    AC_DEFINE(VDKDEBUG)
++    CXXFLAGS="-g"
++  else
++    CXXFLAGS="-s"
++  fi
++fi
++
++if test "x$enable_opt" != "xno"; then
++  CXXFLAGS="$CXXFLAGS -O$enable_opt"
++fi
++
++if test "x$enable_testvdk" = "xyes"; then
++  TESTVDK="testvdk"
++else
++  TESTVDK=""
++fi
++
++AC_SUBST(TESTVDK)
++
++dnl anyhow we have to add -lpthread
++if test "x$enable_sigc" = "xyes" && test "$SIGC_LIBS"!=""; then
++dnl earlier versions of libsigc++ might also work (>= 0.85)
++	AM_PATH_SIGC(1.0.0,,
++	     AC_MSG_WARN(Couldn't find libgsigc++ VDK will be build without it))
++	LIBS="$LIBS $SIGC_LIBS"
++	CFLAGS="$CFLAGS $SIGC_CFLAGS"
++	CXXFLAGS="$CXXFLAGS $SIGC_CFLAGS"
++	SIGCDEFINE="-DUSE_SIGCPLUSPLUS"
++	WITHSIGC="yes"
++else
++	SIGCDEFINE=""
++	SIGC_CFLAGS=""
++	SIGC_LIBS="-lpthread"
++	WITHSIGC="no"
++fi
++
++AC_SUBST(SIGCDEFINE)
++
++
++if test "x$enable_testsigc" = "xyes" && test "$SIGCDEFINE" != ""; then
++	TESTSIGCVDK="testsigcvdk"
++	WITHTESTSIGCVDK="yes"	
++else
++	TESTSIGCVDK=""
++	WITHTESTSIGCVDK="no"	
++fi
++
++AC_SUBST(TESTSIGCVDK)
++
++dnl doxygen support
++
++if test "x$enable_doc_html" = "xyes"; then
++	GENERATE_HTML=YES
++	TAG_SIGC=USE_SIGCPLUSPLUS
++else
++	GENERATE_HTML=NO
++	TAG_SIGC=""
++fi
++
++if test "x$enable_devel" = "xyes"; then
++  cflag="-g"
++fi
++
++if test "x$enable_doc_latex" = "xyes"; then
++	GENERATE_LATEX=YES
++	TAG_SIGC=USE_SIGCPLUSPLUS
++else
++	GENERATE_LATEX=NO
++fi
++
++if test "x$enable_doc_man" = "xyes"; then
++	GENERATE_MAN=YES
++	TAG_SIGC=USE_SIGCPLUSPLUS
++else
++	GENERATE_MAN=NO
++
++fi
++
++AC_SUBST(GENERATE_HTML)
++AC_SUBST(GENERATE_LATEX)
++AC_SUBST(GENERATE_MAN)
++AC_SUBST(TAG_SIGC)
++
++
++GNOMEDEFINE=""
++GNOME_CFLAGS=""
++GNOME_LIBS=""
++GNOME_VDK=""
++
++AC_SUBST(GNOMEDEFINE)
++AC_SUBST(GNOME_LIBS)
++AC_SUBST(GNOME_CFLAGS)
++AC_SUBST(GNOME_VDK)
++
++# just to be fully gtk2.x compliant...
++dnlCXXFLAGS="$CXXFLAGS -DGTK_DISABLE_DEPRECATED -Wall -Wcast-qual -Woverloaded-virtual -Wconversion -Wstrict-prototypes -Winline"
++
++CXXFLAGS="$CXXFLAGS -Wall -Wcast-qual -Woverloaded-virtual -Wconversion -Wstrict-prototypes -Winline"
++
++AC_SUBST(CXXFLAGS)
++
++INCLUDES="$GTK_CFLAGS $SIGC_CFLAGS $SIGCDEFINE"
++
++
++
++AC_SUBST(INCLUDES)
++
++
++
++dnl	  contrib/Makefile 
++dnl	  testvdk/pixmap/Makefile 
++dnl	  sigcvdktest/Makefile 
++dnl       vdk.spec \
++
++AC_OUTPUT([Makefile \
++	vdk/Makefile \
++	vdk/vdkfeatures.h \
++	testvdk/Makefile \
++	sigcvdktest/Makefile \
++	example/Makefile \
++	doc/Makefile \
++	doc/doxy/Makefile \
++	doc/doxy/Doxyfile \
++	vdk-2.m4 \
++	vdk-config-2], \
++	[chmod +x vdk-config-2])	
++
++if test -z $DOXYGEN; then
++	echo "*****************************************************"; 
++	echo "* doxygen was not found, i will not be able to      *"; 
++	echo "* generate the docs by myself.                      *"; 
++	echo "* Doxygen is recommended, please check:             *"; 
++	echo "* http://www.doxygen.org/download.html              *"; 
++	echo "* for the latest version of doxygen.                *";  
++	echo "*****************************************************";
++	WITHDOCHTML="no"
++else
++	WITHDOCHTML="yes"
++fi
++
++echo ""
++echo "VDK configure finished"
++echo "VDK configuration:"
++echo " 	- Version      			    : $VERSION"
++echo " 	- Make static lib		    : $enable_static"
++echo " 	- Make vdk test program		    : $enable_testvdk"
++echo " 	- Libsigc++ signal extension support: $WITHSIGC"
++echo " 	- Make signal extension test program: $WITHTESTSIGCVDK"
++if test "x$WITHSIGC" = "xyes"; then
++echo	"**************************************************************"
++echo	"You have choosed to use Libsigc++ with VDK which is"
++echo	"deprecated and will be unsupported in the near future"
++echo	"**************************************************************"
++fi
++echo " 	- Gnome support			    : $WITHGNOME"
++echo " 	- Debug        			    : $enable_debug"
++echo " 	- Optimization 			    : $enable_opt"
++echo " 	- Make docs on html format	    : $WITHDOCHTML"
++echo " 	* Host                              : $host"
++echo " 	* Installation Prefix               : $prefix"
++echo " 	* Compiler version                  :" `g++ --version`
++echo " 	* Target machine                    :" `c++ -dumpmachine`
++#echo " 	* CPU                               :" `cat /proc/cpuinfo`
+\ Brak znaku nowej linii na koñcu pliku
+diff -burN vdk-2.0.3-oryg/sigcvdktest/Makefile.am vdk-2.0.3/sigcvdktest/Makefile.am
+--- vdk-2.0.3-oryg/sigcvdktest/Makefile.am	2000-11-28 21:50:17.000000000 +0100
++++ vdk-2.0.3/sigcvdktest/Makefile.am	2004-04-09 22:59:47.000000000 +0200
+@@ -1,9 +1,10 @@
+-noinst_PROGRAMS= @TESTSIGCVDK@
++noinst_PROGRAMS= $(TESTSIGCVDK)
+ 
+ EXTRA_PROGRAMS = testsigcvdk props_test
+ 
+-INCLUDES = -I$(top_srcdir)/include @INCLUDES@
+-CXXFLAGS = @CXXFLAGS@
++INCLUDES = -I$(top_srcdir)/include \
++	   $(GTK_CFLAGS) $(SIGC_CFLAGS) $(GNOME_CFLAGS) \
++	   $(SIGCDEFINE) $(GNOMEDEFINE)
+ 
+ testsigcvdk_LDFLAGS = $(GTK_LIBS) $(SIGC_LIBS)
+ testsigcvdk_LDADD = $(top_srcdir)/vdk/libvdk.la 
+diff -burN vdk-2.0.3-oryg/sigcvdktest/Makefile.am~ vdk-2.0.3/sigcvdktest/Makefile.am~
+--- vdk-2.0.3-oryg/sigcvdktest/Makefile.am~	1970-01-01 01:00:00.000000000 +0100
++++ vdk-2.0.3/sigcvdktest/Makefile.am~	2000-11-28 21:50:17.000000000 +0100
+@@ -0,0 +1,23 @@
++noinst_PROGRAMS= @TESTSIGCVDK@
++
++EXTRA_PROGRAMS = testsigcvdk props_test
++
++INCLUDES = -I$(top_srcdir)/include @INCLUDES@
++CXXFLAGS = @CXXFLAGS@
++
++testsigcvdk_LDFLAGS = $(GTK_LIBS) $(SIGC_LIBS)
++testsigcvdk_LDADD = $(top_srcdir)/vdk/libvdk.la 
++
++testsigcvdk_SOURCES = \
++	testclasses.h \
++	testclasses.cc \
++	testbase.cc\
++	eventtestbox.h\
++	eventtestbox.cc
++
++props_test_SOURCES=props_test.cc
++props_test_LDFLAGS=$(SIGC_LIBS) $(GTK_LIBS)
++props_test_LDADD= $(top_srcdir)/vdk/libvdk.la
++
++clean: 
++	-rm *~ \#
+diff -burN vdk-2.0.3-oryg/sigcvdktest/Makefile.am-oryg vdk-2.0.3/sigcvdktest/Makefile.am-oryg
+--- vdk-2.0.3-oryg/sigcvdktest/Makefile.am-oryg	1970-01-01 01:00:00.000000000 +0100
++++ vdk-2.0.3/sigcvdktest/Makefile.am-oryg	2004-04-09 22:58:29.000000000 +0200
+@@ -0,0 +1,23 @@
++noinst_PROGRAMS= @TESTSIGCVDK@
++
++EXTRA_PROGRAMS = testsigcvdk props_test
++
++INCLUDES = -I$(top_srcdir)/include @INCLUDES@
++CXXFLAGS = @CXXFLAGS@
++
++testsigcvdk_LDFLAGS = $(GTK_LIBS) $(SIGC_LIBS)
++testsigcvdk_LDADD = $(top_srcdir)/vdk/libvdk.la 
++
++testsigcvdk_SOURCES = \
++	testclasses.h \
++	testclasses.cc \
++	testbase.cc\
++	eventtestbox.h\
++	eventtestbox.cc
++
++props_test_SOURCES=props_test.cc
++props_test_LDFLAGS=$(SIGC_LIBS) $(GTK_LIBS)
++props_test_LDADD= $(top_srcdir)/vdk/libvdk.la
++
++clean: 
++	-rm *~ \#
+diff -burN vdk-2.0.3-oryg/testvdk/Makefile.am vdk-2.0.3/testvdk/Makefile.am
+--- vdk-2.0.3-oryg/testvdk/Makefile.am	2003-01-23 14:46:23.000000000 +0100
++++ vdk-2.0.3/testvdk/Makefile.am	2004-04-09 22:56:31.000000000 +0200
+@@ -1,11 +1,10 @@
+ SUBDIRS = .
+ 
+-noinst_PROGRAMS = @TESTVDK@
++noinst_PROGRAMS = $(TESTVDK)
+ 
+ EXTRA_PROGRAMS = testvdk testvdkstring
+ 
+-INCLUDES = @INCLUDES@
+-CXXFLAGS = @CXXFLAGS@
++INCLUDES = $(GTK_CFLAGS) $(SIGC_CFLAGS) $(GNOME_CFLAGS) $(SIGCDEFINE) $(GNOMEDEFINE)
+ 
+ testvdk_LDFLAGS = $(GTK_LIBS) $(SIGC_LIBS)
+ testvdk_LDADD = $(top_srcdir)/vdk/libvdk.la
+@@ -39,10 +38,9 @@
+ 
+ testvdkstring_SOURCES = testvdkstring.cc 
+ 
+-testvdkstring_LDFLAGS = $(GTK_LIBS) $(SIGC_LIBS)
+-
+-testvdkstring_LDADD = $(top_srcdir)/vdk/libvdk.la
+-
++tvdkstring_LDADD = \
++	$(top_srcdir)/vdk/libvdk.la
++	$(GTK_LIBS) $(SIGC_LIBS)
+ 
+ EXTRA_DIST = \
+ 	loadfile.xpm \
+diff -burN vdk-2.0.3-oryg/testvdk/Makefile.am~ vdk-2.0.3/testvdk/Makefile.am~
+--- vdk-2.0.3-oryg/testvdk/Makefile.am~	1970-01-01 01:00:00.000000000 +0100
++++ vdk-2.0.3/testvdk/Makefile.am~	2004-04-09 22:53:12.000000000 +0200
+@@ -0,0 +1,54 @@
++SUBDIRS = .
++
++noinst_PROGRAMS = $(TESTVDK)
++
++EXTRA_PROGRAMS = testvdk testvdkstring
++
++INCLUDES = $(GTK_CFLAGS) $(SIGC_CFLAGS) $(GNOME_CFLAGS) $(SIGCDEFINE) $(GNOMEDEFINE)
++
++testvdk_LDFLAGS = $(GTK_LIBS) $(SIGC_LIBS)
++testvdk_LDADD = $(top_srcdir)/vdk/libvdk.la
++
++testvdk_SOURCES = \
++	testvdk.cc \
++	testvdk.h \
++	bookcompo.cc\
++	bookcompo.h\
++	canvascompo.cc \
++	canvascompo.h \
++	drawingcompo.cc \
++	drawingcompo.h \
++	combocompo.cc\
++	combocompo.h\
++	chartcompo.cc \
++	chartcompo.h \
++	ctreecompo.cc \
++	ctreecompo.h \
++	edcompo.cc\
++	edcompo.h\
++	progcompo.cc\
++	progcompo.h\
++	sigctest.cc \
++	sigctest.h \
++	dnd.cc \
++	dnd.h \
++	treeviewcompo.h\
++	treeviewcompo.cc\
++	pixmaps.cc
++
++testvdkstring_SOURCES = testvdkstring.cc 
++
++testvdkstring_LDFLAGS = $(GTK_LIBS) $(SIGC_LIBS)
++
++testvdkstring_LDADD = $(top_srcdir)/vdk/libvdk.la
++
++
++EXTRA_DIST = \
++	loadfile.xpm \
++	f104.xpm \
++	vdklogo.xpm \
++	fuzzy.png\
++	testvdkrc\
++	vitrurian.png\
++	stop.png\
++	tokens.db
+diff -burN vdk-2.0.3-oryg/testvdk/Makefile.am-oryg vdk-2.0.3/testvdk/Makefile.am-oryg
+--- vdk-2.0.3-oryg/testvdk/Makefile.am-oryg	1970-01-01 01:00:00.000000000 +0100
++++ vdk-2.0.3/testvdk/Makefile.am-oryg	2004-04-09 22:51:43.000000000 +0200
+@@ -0,0 +1,55 @@
++SUBDIRS = .
++
++noinst_PROGRAMS = @TESTVDK@
++
++EXTRA_PROGRAMS = testvdk testvdkstring
++
++INCLUDES = @INCLUDES@
++CXXFLAGS = @CXXFLAGS@
++
++testvdk_LDFLAGS = $(GTK_LIBS) $(SIGC_LIBS)
++testvdk_LDADD = $(top_srcdir)/vdk/libvdk.la
++
++testvdk_SOURCES = \
++	testvdk.cc \
++	testvdk.h \
++	bookcompo.cc\
++	bookcompo.h\
++	canvascompo.cc \
++	canvascompo.h \
++	drawingcompo.cc \
++	drawingcompo.h \
++	combocompo.cc\
++	combocompo.h\
++	chartcompo.cc \
++	chartcompo.h \
++	ctreecompo.cc \
++	ctreecompo.h \
++	edcompo.cc\
++	edcompo.h\
++	progcompo.cc\
++	progcompo.h\
++	sigctest.cc \
++	sigctest.h \
++	dnd.cc \
++	dnd.h \
++	treeviewcompo.h\
++	treeviewcompo.cc\
++	pixmaps.cc
++
++testvdkstring_SOURCES = testvdkstring.cc 
++
++testvdkstring_LDFLAGS = $(GTK_LIBS) $(SIGC_LIBS)
++
++testvdkstring_LDADD = $(top_srcdir)/vdk/libvdk.la
++
++
++EXTRA_DIST = \
++	loadfile.xpm \
++	f104.xpm \
++	vdklogo.xpm \
++	fuzzy.png\
++	testvdkrc\
++	vitrurian.png\
++	stop.png\
++	tokens.db
+diff -burN vdk-2.0.3-oryg/vdk/Makefile.am vdk-2.0.3/vdk/Makefile.am
+--- vdk-2.0.3-oryg/vdk/Makefile.am	2003-05-11 17:08:49.000000000 +0200
++++ vdk-2.0.3/vdk/Makefile.am	2004-04-09 22:58:15.000000000 +0200
+@@ -259,8 +259,9 @@
+ 
+ 
+ 
+-INCLUDES = -I$(top_srcdir)/include @INCLUDES@
+-CXXFLAGS = @CXXFLAGS@
++INCLUDES = -I$(top_srcdir)/include \
++	   $(GTK_CFLAGS) $(SIGC_CFLAGS) $(GNOME_CFLAGS) \
++	   $(SIGCDEFINE) $(GNOMEDEFINE)
+ 
+ LDFLAGS = $(GTK_CFLAGS) $(SIGC_CFLAGS)
+ LIBS = $(GTK_LIBS) $(SIGC_LIBS)
+diff -burN vdk-2.0.3-oryg/vdk/Makefile.am~ vdk-2.0.3/vdk/Makefile.am~
+--- vdk-2.0.3-oryg/vdk/Makefile.am~	1970-01-01 01:00:00.000000000 +0100
++++ vdk-2.0.3/vdk/Makefile.am~	2003-05-11 17:08:49.000000000 +0200
+@@ -0,0 +1,272 @@
++lib_LTLIBRARIES = libvdk.la
++
++vdkincludedir = $(includedir)/vdk2/vdk
++#	gtkcombobutton.h
++#	FileTreeDialog.h
++# 	dirtree.h
++#	gtkdatabox.h
++#	gtkeditor.h
++#	gtksheet.h
++#	gtkitementry.h\
++#	gtkdirtree.h
++#	gtkfilelist.h
++#	gtkiconfilesel.h
++#	gtkiconlist.h
++#	coolbar.h
++#	coolbutton.h
++#	vdkdatabox.h
++#	panedform.h
++#	scrolledForm.h
++#	vdkgrid.h
++#	vdkcolorbrowser.h
++#	label_togglebutton.h
++#	pix_togglebutton.h
++#	togglebutton.h
++#	regex.h 
++#	gtkextext.h 
++# 	messagebox.h
++#	text.h
++#	vdkregex.h
++#	vdktextview.h
++#	vdkpacker.h
++
++vdkinclude_HEADERS = \
++	regex.h\
++	gtksourcebuffer.h\
++	gtktextsearch.h \
++	gtksourcetag.h\
++	gtksourceview.h\
++	gtkundomanager.h \
++	gtksourceview-marshal.h\
++	gtktextregion.h\
++	vdkeditor.h\
++\
++	gtkdatabox.h\
++	gtkdataboxmarshal.h\
++\
++	FileDialog.h\
++	FileSaveAsDialog.h\
++	abstract_button.h\
++	application.h\
++	boxes.h\
++	button.h\
++	canvas.h\
++	chart.h\
++	checkbutton.h\
++	colors.h\
++	combo.h\
++	container.h\
++	dlist.h\
++	entry.h\
++	evbrowser.h\
++	evhandle.h\
++	evlisthandle.h\
++	evobjhandle.h\
++	filedlg.h\
++	fixed.h\
++	forms.h\
++	frame.h\
++	handlebox.h\
++	image.h\
++	label.h\
++	menu.h\
++	messagebox.h\
++	notebook.h\
++	numentry.h\
++	paned.h\
++	panelbar.h\
++	pixmaps.h\
++	progressbar.h\
++	radiobtngroup.h\
++	rawpixbuf.h\
++	rawobj.h\
++	rawpixmap.h\
++	scrolled.h\
++	separator.h\
++	siglisthandle.h\
++	slider.h\
++	spins.h\
++	statusbar.h\
++	tables.h\
++	timer.h\
++	toolbar.h\
++	tooltips.h\
++	value_sem_list.h\
++	vdk.h\
++	vdkarray.h\
++	vdkbtrees.h\
++	vdkcalendar.h\
++	vdkclist.h\
++	vdkcsortlist.h\
++	vdkctree.h\
++	vdkcursor.h\
++	vdkcustom.h\
++	vdkcustombutton.h\
++	vdkdatabox.h\
++	vdkdate.h\
++	vdkdrawarea.h\
++	vdkdnd.h\
++	vdkfont.h\
++	vdkfeatures.h\
++	vdkheap.h\
++	vdkhlbutton.h\
++	vdkhlbuttonbar.h\
++	vdkinchannel.h\
++	vdkobj.h\
++	vdkprops.h\
++	vdkstring.h\
++	vdktextview.h\
++	vdktreeview.h\
++	vdkthread.h\
++	vdktypes.h\
++	vdkutils.h\
++	widcontain.h\
++	eventbox.h\
++	sigc_addon.h\
++	sigc_events.h\
++	sigc_eventsignals.h\
++	sigc_eventtraits.h\
++	vdkgnomeapp.h\
++	vdkgnomeform.h\
++	vdkgnomeappbar.h\
++	vdkgnomededit.h\
++	vdkgnomeentry.h\
++	vdkfileicondlg.h\
++	vdkdockable.h
++
++
++#	coolbar.cc
++#	coolbutton.cc
++#	FileTreeDialog.cc
++#	dirtree.c
++#	gtkdatabox.c
++#	vdkdatabox.cc
++#	gtksheet.c
++#	gtkitementry.c
++#	gtkdirtree.c
++#	gtkfileicons.c
++#	gtkfilelist.c
++#	gtkiconfilesel.c
++#	gtkiconlist.c
++#	vdkgrid.cc
++#	vdkfileicondlg.cc
++#	panedform.cc
++#	scrolledForm.cc
++# 	evbrowser.cc
++#	vdkcolorbrowser.cc
++#	label_togglebutton.cc
++#	pix_togglebutton.cc
++#	togglebutton.cc
++#	regex.c 
++#	gtkextext.c 
++# 	messagebox.cc
++#	text.cc
++#	vdkregex.cc
++#	vdkpacker.cc
++
++
++libvdk_la_SOURCES = \
++	regex.c\
++	gtksourcebuffer.c\
++	gtktextsearch.c \
++	gtksourcetag.c\
++	gtksourceview.c\
++	gtkundomanager.c \
++	gtksourceview-marshal.c\
++	gtktextregion.c\
++	vdkeditor.cc\
++\
++	gtkdatabox.c\
++	gtkdataboxmarshal.c\
++\
++	abstract_button.cc\
++	application.cc\
++	boxes.cc\
++	button.cc\
++	canvas.cc\
++	checkbutton.cc\
++	colors.cc\
++	entry.cc\
++	filedlg.cc\
++	fixed.cc\
++	forms.cc\
++	frame.cc\
++	handlebox.cc\
++	image.cc\
++	label.cc\
++	menu.cc\
++	msgdialog.cc \
++	notebook.cc\
++	numentry.cc\
++	paned.cc\
++	pixdata.cc\
++	pixmaps.cc\
++	progressbar.cc\
++	radiobtngroup.cc\
++	rawobj.cc\
++	rawpixbuf.cc\
++	rawpixmap.cc\
++	scrolled.cc\
++	separator.cc\
++	slider.cc\
++	spins.cc\
++	statusbar.cc\
++	tables.cc\
++	timer.cc\
++	toolbar.cc\
++	tooltips.cc\
++	vdkcalendar.cc\
++	vdkclist.cc\
++	vdkcsortlist.cc\
++	vdkctree.cc\
++	vdkcustom.cc\
++	vdkcustombutton.cc\
++	vdkdate.cc\
++	vdkdatabox.cc\
++	vdkdrawarea.cc\
++	vdkdnd.cc\
++	vdkinchannel.cc\
++	vdkfont.cc\
++	vdkhlbutton.cc\
++	vdkhlbuttonbar.cc\
++	vdkobj.cc\
++	vdkstring.cc\
++	vdktextview.cc\
++	vdktreeview.cc\
++	vdkthread.cc\
++	widcontain.cc\
++	eventbox.cc\
++	vdkdockable.cc\
++\
++	FileDialog.cc\
++	FileSaveAsDialog.cc\
++	chart.cc\
++	combo.cc\
++	folder_collapsed.xpm\
++	folder_expanded.xpm\
++	panelbar.cc\
++\
++	vdkgnomeapp.cc\
++	vdkgnomeform.cc\
++	vdkgnomeappbar.cc\
++	vdkgnomededit.cc\
++	vdkgnomeentry.cc
++
++
++libvdk_la_LDFLAGS = \
++		-version-info $(LT_VDK_CURRENT):$(LT_VDK_REVISION):$(LT_VDK_AGE)
++#		-release $(GTK_RELEASE)
++
++
++
++INCLUDES = -I$(top_srcdir)/include @INCLUDES@
++CXXFLAGS = @CXXFLAGS@
++
++LDFLAGS = $(GTK_CFLAGS) $(SIGC_CFLAGS)
++LIBS = $(GTK_LIBS) $(SIGC_LIBS)
++
++EXTRA_DIST = \
++	rgb.cc\
++	sigc_events.cc\
++	sigc_eventsignals.cc\
++	sigc_eventtraits.cc
+diff -burN vdk-2.0.3-oryg/vdk/Makefile.am-oryg vdk-2.0.3/vdk/Makefile.am-oryg
+--- vdk-2.0.3-oryg/vdk/Makefile.am-oryg	1970-01-01 01:00:00.000000000 +0100
++++ vdk-2.0.3/vdk/Makefile.am-oryg	2004-04-09 22:56:50.000000000 +0200
+@@ -0,0 +1,272 @@
++lib_LTLIBRARIES = libvdk.la
++
++vdkincludedir = $(includedir)/vdk2/vdk
++#	gtkcombobutton.h
++#	FileTreeDialog.h
++# 	dirtree.h
++#	gtkdatabox.h
++#	gtkeditor.h
++#	gtksheet.h
++#	gtkitementry.h\
++#	gtkdirtree.h
++#	gtkfilelist.h
++#	gtkiconfilesel.h
++#	gtkiconlist.h
++#	coolbar.h
++#	coolbutton.h
++#	vdkdatabox.h
++#	panedform.h
++#	scrolledForm.h
++#	vdkgrid.h
++#	vdkcolorbrowser.h
++#	label_togglebutton.h
++#	pix_togglebutton.h
++#	togglebutton.h
++#	regex.h 
++#	gtkextext.h 
++# 	messagebox.h
++#	text.h
++#	vdkregex.h
++#	vdktextview.h
++#	vdkpacker.h
++
++vdkinclude_HEADERS = \
++	regex.h\
++	gtksourcebuffer.h\
++	gtktextsearch.h \
++	gtksourcetag.h\
++	gtksourceview.h\
++	gtkundomanager.h \
++	gtksourceview-marshal.h\
++	gtktextregion.h\
++	vdkeditor.h\
++\
++	gtkdatabox.h\
++	gtkdataboxmarshal.h\
++\
++	FileDialog.h\
++	FileSaveAsDialog.h\
++	abstract_button.h\
++	application.h\
++	boxes.h\
++	button.h\
++	canvas.h\
++	chart.h\
++	checkbutton.h\
++	colors.h\
++	combo.h\
++	container.h\
++	dlist.h\
++	entry.h\
++	evbrowser.h\
++	evhandle.h\
++	evlisthandle.h\
++	evobjhandle.h\
++	filedlg.h\
++	fixed.h\
++	forms.h\
++	frame.h\
++	handlebox.h\
++	image.h\
++	label.h\
++	menu.h\
++	messagebox.h\
++	notebook.h\
++	numentry.h\
++	paned.h\
++	panelbar.h\
++	pixmaps.h\
++	progressbar.h\
++	radiobtngroup.h\
++	rawpixbuf.h\
++	rawobj.h\
++	rawpixmap.h\
++	scrolled.h\
++	separator.h\
++	siglisthandle.h\
++	slider.h\
++	spins.h\
++	statusbar.h\
++	tables.h\
++	timer.h\
++	toolbar.h\
++	tooltips.h\
++	value_sem_list.h\
++	vdk.h\
++	vdkarray.h\
++	vdkbtrees.h\
++	vdkcalendar.h\
++	vdkclist.h\
++	vdkcsortlist.h\
++	vdkctree.h\
++	vdkcursor.h\
++	vdkcustom.h\
++	vdkcustombutton.h\
++	vdkdatabox.h\
++	vdkdate.h\
++	vdkdrawarea.h\
++	vdkdnd.h\
++	vdkfont.h\
++	vdkfeatures.h\
++	vdkheap.h\
++	vdkhlbutton.h\
++	vdkhlbuttonbar.h\
++	vdkinchannel.h\
++	vdkobj.h\
++	vdkprops.h\
++	vdkstring.h\
++	vdktextview.h\
++	vdktreeview.h\
++	vdkthread.h\
++	vdktypes.h\
++	vdkutils.h\
++	widcontain.h\
++	eventbox.h\
++	sigc_addon.h\
++	sigc_events.h\
++	sigc_eventsignals.h\
++	sigc_eventtraits.h\
++	vdkgnomeapp.h\
++	vdkgnomeform.h\
++	vdkgnomeappbar.h\
++	vdkgnomededit.h\
++	vdkgnomeentry.h\
++	vdkfileicondlg.h\
++	vdkdockable.h
++
++
++#	coolbar.cc
++#	coolbutton.cc
++#	FileTreeDialog.cc
++#	dirtree.c
++#	gtkdatabox.c
++#	vdkdatabox.cc
++#	gtksheet.c
++#	gtkitementry.c
++#	gtkdirtree.c
++#	gtkfileicons.c
++#	gtkfilelist.c
++#	gtkiconfilesel.c
++#	gtkiconlist.c
++#	vdkgrid.cc
++#	vdkfileicondlg.cc
++#	panedform.cc
++#	scrolledForm.cc
++# 	evbrowser.cc
++#	vdkcolorbrowser.cc
++#	label_togglebutton.cc
++#	pix_togglebutton.cc
++#	togglebutton.cc
++#	regex.c 
++#	gtkextext.c 
++# 	messagebox.cc
++#	text.cc
++#	vdkregex.cc
++#	vdkpacker.cc
++
++
++libvdk_la_SOURCES = \
++	regex.c\
++	gtksourcebuffer.c\
++	gtktextsearch.c \
++	gtksourcetag.c\
++	gtksourceview.c\
++	gtkundomanager.c \
++	gtksourceview-marshal.c\
++	gtktextregion.c\
++	vdkeditor.cc\
++\
++	gtkdatabox.c\
++	gtkdataboxmarshal.c\
++\
++	abstract_button.cc\
++	application.cc\
++	boxes.cc\
++	button.cc\
++	canvas.cc\
++	checkbutton.cc\
++	colors.cc\
++	entry.cc\
++	filedlg.cc\
++	fixed.cc\
++	forms.cc\
++	frame.cc\
++	handlebox.cc\
++	image.cc\
++	label.cc\
++	menu.cc\
++	msgdialog.cc \
++	notebook.cc\
++	numentry.cc\
++	paned.cc\
++	pixdata.cc\
++	pixmaps.cc\
++	progressbar.cc\
++	radiobtngroup.cc\
++	rawobj.cc\
++	rawpixbuf.cc\
++	rawpixmap.cc\
++	scrolled.cc\
++	separator.cc\
++	slider.cc\
++	spins.cc\
++	statusbar.cc\
++	tables.cc\
++	timer.cc\
++	toolbar.cc\
++	tooltips.cc\
++	vdkcalendar.cc\
++	vdkclist.cc\
++	vdkcsortlist.cc\
++	vdkctree.cc\
++	vdkcustom.cc\
++	vdkcustombutton.cc\
++	vdkdate.cc\
++	vdkdatabox.cc\
++	vdkdrawarea.cc\
++	vdkdnd.cc\
++	vdkinchannel.cc\
++	vdkfont.cc\
++	vdkhlbutton.cc\
++	vdkhlbuttonbar.cc\
++	vdkobj.cc\
++	vdkstring.cc\
++	vdktextview.cc\
++	vdktreeview.cc\
++	vdkthread.cc\
++	widcontain.cc\
++	eventbox.cc\
++	vdkdockable.cc\
++\
++	FileDialog.cc\
++	FileSaveAsDialog.cc\
++	chart.cc\
++	combo.cc\
++	folder_collapsed.xpm\
++	folder_expanded.xpm\
++	panelbar.cc\
++\
++	vdkgnomeapp.cc\
++	vdkgnomeform.cc\
++	vdkgnomeappbar.cc\
++	vdkgnomededit.cc\
++	vdkgnomeentry.cc
++
++
++libvdk_la_LDFLAGS = \
++		-version-info $(LT_VDK_CURRENT):$(LT_VDK_REVISION):$(LT_VDK_AGE)
++#		-release $(GTK_RELEASE)
++
++
++
++INCLUDES = -I$(top_srcdir)/include @INCLUDES@
++CXXFLAGS = @CXXFLAGS@
++
++LDFLAGS = $(GTK_CFLAGS) $(SIGC_CFLAGS)
++LIBS = $(GTK_LIBS) $(SIGC_LIBS)
++
++EXTRA_DIST = \
++	rgb.cc\
++	sigc_events.cc\
++	sigc_eventsignals.cc\
++	sigc_eventtraits.cc
