@@ -12,7 +12,7 @@ URL:		http://vdkbuilder.sourceforge.net/
 BuildRequires:	autoconf
 BuildRequires:	automake
 BuildRequires:	doxygen
-BuildRequires:	freetype-devel
+BuildRequires:	freetype-devel >= 2.0.0
 BuildRequires:	gtk+2-devel >= 2.0.0
 BuildRequires:	imlib-devel
 BuildRequires:	libsigc++-devel >= 1.0.0
