@@ -3,7 +3,7 @@ Summary:	C++ Wrapper over GTK+ 2.0.x library
 Summary(pl):	Wrapper C++ dla GTK+ 2.0.x
 Name:		vdk
 Version:	2.0.3
-Release:	1
+Release:	2
 License:	LGPL
 Group:		X11/Libraries
 Source0:	http://dl.sourceforge.net/vdkbuilder/%{name}-%{version}.tar.gz
@@ -19,9 +19,9 @@ BuildRequires:	imlib-devel
 BuildRequires:	libsigc++12-devel >= 1.0.0
 BuildRequires:	libstdc++-devel
 BuildRequires:	libtool
-BuildRequires:	perl >= 5.6
+BuildRequires:	perl-devel >= 1:5.6
 BuildRequires:	pkgconfig
-BuildRequires:	rpm-perlprov >= 3.0.3-16
+BuildRequires:	rpm-perlprov >= 4.1-13
 BuildRequires:	zlib-devel
 BuildRequires:	libsigc++1-devel
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
