@@ -36,7 +36,7 @@ Wrapper C++ dla GTK+ 2.0.x.
 Summary:	VDK header files, development documentation
 Summary(pl):	Pliki nag³ówkowe VDK, dokumentacja dla programistów
 Group:		X11/Development/Libraries
-Requires:	%{name} = %{version}
+Requires:	%{name} = %{version}-%{release}
 Requires:	gtk+2-devel >= 2.0.0
 
 %description devel
@@ -49,7 +49,7 @@ Pliki nag³ówkowe i dokumentacja dla programistów do biblioteki VDK.
 Summary:	VDK static libraries
 Summary(pl):	Biblioteki statyczne VDK
 Group:		X11/Development/Libraries
-Requires:	%{name}-devel = %{version}
+Requires:	%{name}-devel = %{version}-%{release}
 
 %description static
 VDK static libraries.
