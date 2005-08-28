@@ -1,6 +1,5 @@
 #
 # Conditional build:
-#
 %bcond_without	static_libs # don't build static libraries
 #
 %include	/usr/lib/rpm/macros.perl
@@ -19,8 +18,10 @@ BuildRequires:	autoconf >= 2.52
 BuildRequires:	automake
 BuildRequires:	doxygen
 BuildRequires:	freetype-devel >= 2.0.0
-BuildRequires:	gtk+2-devel >= 1:2.4.0
+BuildRequires:	gtk+2-devel >= 2:2.4.0
 BuildRequires:	imlib-devel
+# both???
+BuildRequires:	libsigc++1-devel
 BuildRequires:	libsigc++12-devel >= 1.0.0
 BuildRequires:	libstdc++-devel
 BuildRequires:	libtool
@@ -28,7 +29,6 @@ BuildRequires:	perl-devel >= 1:5.6
 BuildRequires:	pkgconfig
 BuildRequires:	rpm-perlprov >= 4.1-13
 BuildRequires:	zlib-devel
-BuildRequires:	libsigc++1-devel
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
@@ -42,7 +42,7 @@ Summary:	VDK header files, development documentation
 Summary(pl):	Pliki nag³ówkowe VDK, dokumentacja dla programistów
 Group:		X11/Development/Libraries
 Requires:	%{name} = %{version}-%{release}
-Requires:	gtk+2-devel >= 1:2.4.0
+Requires:	gtk+2-devel >= 2:2.4.0
 
 %description devel
 Header files and development documentation for VDK library.
@@ -68,7 +68,6 @@ Biblioteki statyczne VDK.
 
 %build
 # exceptions and rtti are used in this package --misiek
-rm -f missing
 %{__libtoolize}
 %{__aclocal}
 %{__autoconf}
@@ -102,13 +101,13 @@ rm -rf $RPM_BUILD_ROOT
 %files devel
 %defattr(644,root,root,755)
 %doc README ChangeLog AUTHORS NEWS BUGS TODO doc/doxy/html
-%{_examplesdir}/%{name}-%{version}
+%attr(755,root,root) %{_bindir}/*
 %attr(755,root,root) %{_libdir}/lib*.so
 %{_libdir}/lib*.la
-%attr(755,root,root) %{_bindir}/*
 %{_aclocaldir}/*.m4
 %{_includedir}/vdk2
 %{_mandir}/man1/*
+%{_examplesdir}/%{name}-%{version}
 %{_pkgconfigdir}/*
 
 %if %{with static_libs}
