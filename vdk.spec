@@ -20,9 +20,6 @@ BuildRequires:	doxygen
 BuildRequires:	freetype-devel >= 2.0.0
 BuildRequires:	gtk+2-devel >= 2:2.4.0
 BuildRequires:	imlib-devel
-# both???
-BuildRequires:	libsigc++1-devel
-BuildRequires:	libsigc++12-devel >= 1.0.0
 BuildRequires:	libstdc++-devel
 BuildRequires:	libtool
 BuildRequires:	perl-devel >= 1:5.6
