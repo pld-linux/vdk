@@ -1,20 +1,25 @@
+#
+# Conditional build:
+#
+%bcond_without	static_libs # don't build static libraries
+#
 %include	/usr/lib/rpm/macros.perl
-Summary:	C++ Wrapper over GTK+ 2.0.x library
-Summary(pl):	Wrapper C++ dla GTK+ 2.0.x
+Summary:	C++ Wrapper over GTK+ 2.x library
+Summary(pl):	Wrapper C++ dla GTK+ 2.x
 Name:		vdk
-Version:	2.0.3
-Release:	2
+Version:	2.4.1
+Release:	0.1
 License:	LGPL
 Group:		X11/Libraries
-Source0:	http://dl.sourceforge.net/vdkbuilder/%{name}-%{version}.tar.gz
-# Source0-md5:	b76be21a0014d089c176442ba68bd3c7
-Patch0:		%{name}-ac-am-fixes.patch
-URL:		http://vdkbuilder.sourceforge.net/
-BuildRequires:	autoconf
+Source0:	http://kent.dl.sourceforge.net/sourceforge/vdklib/%{name}-%{version}.tar.gz
+# Source0-md5:	f388bf265a476880e98ddec7ac4e63f7
+Patch0:		%{name}-ac_FLAGS.patch
+URL:		http://www.mariomotta.it/vdklib/
+BuildRequires:	autoconf >= 2.52
 BuildRequires:	automake
 BuildRequires:	doxygen
 BuildRequires:	freetype-devel >= 2.0.0
-BuildRequires:	gtk+2-devel >= 1:2.0.0
+BuildRequires:	gtk+2-devel >= 1:2.4.0
 BuildRequires:	imlib-devel
 BuildRequires:	libsigc++12-devel >= 1.0.0
 BuildRequires:	libstdc++-devel
@@ -27,17 +32,17 @@ BuildRequires:	libsigc++1-devel
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
-C++ Wrapper over GTK+ 2.0.x library.
+C++ Wrapper over GTK+ 2.x library.
 
 %description -l pl
-Wrapper C++ dla GTK+ 2.0.x.
+Wrapper C++ dla GTK+ 2.x.
 
 %package devel
 Summary:	VDK header files, development documentation
 Summary(pl):	Pliki nag³ówkowe VDK, dokumentacja dla programistów
 Group:		X11/Development/Libraries
 Requires:	%{name} = %{version}-%{release}
-Requires:	gtk+2-devel >= 2.0.0
+Requires:	gtk+2-devel >= 1:2.4.0
 
 %description devel
 Header files and development documentation for VDK library.
@@ -69,7 +74,8 @@ rm -f missing
 %{__autoconf}
 %{__automake}
 %configure \
-	--enable-static=yes
+	%{?with_static_libs:--enable-static=yes} \
+	%{!?with_static_libs:--enable-static=no}
 %{__make}
 %{__make} docs
 
@@ -103,7 +109,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_aclocaldir}/*.m4
 %{_includedir}/vdk2
 %{_mandir}/man1/*
+%{_pkgconfigdir}/*
 
+%if %{with static_libs}
 %files static
 %defattr(644,root,root,755)
 %{_libdir}/lib*.a
+%endif
