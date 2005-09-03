@@ -7,10 +7,10 @@ Summary:	C++ Wrapper over GTK+ 2.x library
 Summary(pl):	Wrapper C++ dla GTK+ 2.x
 Name:		vdk
 Version:	2.4.1
-Release:	0.1
+Release:	1
 License:	LGPL
 Group:		X11/Libraries
-Source0:	http://kent.dl.sourceforge.net/sourceforge/vdklib/%{name}-%{version}.tar.gz
+Source0:	http://dl.sourceforge.net/sourceforge/vdklib/%{name}-%{version}.tar.gz
 # Source0-md5:	f388bf265a476880e98ddec7ac4e63f7
 Patch0:		%{name}-ac_FLAGS.patch
 URL:		http://www.mariomotta.it/vdklib/
