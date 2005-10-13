@@ -1,0 +1,14 @@
+diff -Nurb vdk-2.4.1/vdk-config-2.in n.vdk-2.4.1/vdk-config-2.in
+--- vdk-2.4.1/vdk-config-2.in	2004-11-06 18:55:50.000000000 +0100
++++ n.vdk-2.4.1/vdk-config-2.in	2005-10-13 18:01:49.778655528 +0200
+@@ -12,8 +12,8 @@
+ 
+ transform=@program_transform_name@
+ 
+-CFLAGS="-I@includedir@/vdk2"
+-LIBDIRS="-L@libdir@"
++CFLAGS="-I@includedir@/vdk2 `pkg-config cairo --cflags`"
++LIBDIRS="-L@libdir@ "
+ 
+ vdk_libs="$LIBDIRS -lvdk -lpthread @GTK_LIBS@"
+ vdk_cflags="$CFLAGS @GTK_CFLAGS@"
