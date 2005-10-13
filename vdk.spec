@@ -13,6 +13,7 @@ Group:		X11/Libraries
 Source0:	http://dl.sourceforge.net/sourceforge/vdklib/%{name}-%{version}.tar.gz
 # Source0-md5:	f388bf265a476880e98ddec7ac4e63f7
 Patch0:		%{name}-ac_FLAGS.patch
+Patch1:		%{name}-cairo.patch
 URL:		http://www.mariomotta.it/vdklib/
 BuildRequires:	autoconf >= 2.52
 BuildRequires:	automake
@@ -62,6 +63,7 @@ Biblioteki statyczne VDK.
 %prep
 %setup -q
 %patch0 -p1
+%patch1 -p1
 
 %build
 # exceptions and rtti are used in this package --misiek
