@@ -4,7 +4,7 @@
 #
 %include	/usr/lib/rpm/macros.perl
 Summary:	C++ Wrapper over GTK+ 2.x library
-Summary(pl.UTF-8):   Wrapper C++ dla GTK+ 2.x
+Summary(pl.UTF-8):	Wrapper C++ dla GTK+ 2.x
 Name:		vdk
 Version:	2.4.1
 Release:	1
@@ -37,7 +37,7 @@ Wrapper C++ dla GTK+ 2.x.
 
 %package devel
 Summary:	VDK header files, development documentation
-Summary(pl.UTF-8):   Pliki nagłówkowe VDK, dokumentacja dla programistów
+Summary(pl.UTF-8):	Pliki nagłówkowe VDK, dokumentacja dla programistów
 Group:		X11/Development/Libraries
 Requires:	%{name} = %{version}-%{release}
 Requires:	gtk+2-devel >= 2:2.4.0
@@ -50,7 +50,7 @@ Pliki nagłówkowe i dokumentacja dla programistów do biblioteki VDK.
 
 %package static
 Summary:	VDK static libraries
-Summary(pl.UTF-8):   Biblioteki statyczne VDK
+Summary(pl.UTF-8):	Biblioteki statyczne VDK
 Group:		X11/Development/Libraries
 Requires:	%{name}-devel = %{version}-%{release}
 
