@@ -4,7 +4,7 @@
 #
 %include	/usr/lib/rpm/macros.perl
 Summary:	C++ Wrapper over GTK+ 2.x library
-Summary(pl):	Wrapper C++ dla GTK+ 2.x
+Summary(pl.UTF-8):   Wrapper C++ dla GTK+ 2.x
 Name:		vdk
 Version:	2.4.1
 Release:	1
@@ -32,12 +32,12 @@ BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 %description
 C++ Wrapper over GTK+ 2.x library.
 
-%description -l pl
+%description -l pl.UTF-8
 Wrapper C++ dla GTK+ 2.x.
 
 %package devel
 Summary:	VDK header files, development documentation
-Summary(pl):	Pliki nag丑wkowe VDK, dokumentacja dla programist體
+Summary(pl.UTF-8):   Pliki nag艂贸wkowe VDK, dokumentacja dla programist贸w
 Group:		X11/Development/Libraries
 Requires:	%{name} = %{version}-%{release}
 Requires:	gtk+2-devel >= 2:2.4.0
@@ -45,19 +45,19 @@ Requires:	gtk+2-devel >= 2:2.4.0
 %description devel
 Header files and development documentation for VDK library.
 
-%description devel -l pl
-Pliki nag丑wkowe i dokumentacja dla programist體 do biblioteki VDK.
+%description devel -l pl.UTF-8
+Pliki nag艂贸wkowe i dokumentacja dla programist贸w do biblioteki VDK.
 
 %package static
 Summary:	VDK static libraries
-Summary(pl):	Biblioteki statyczne VDK
+Summary(pl.UTF-8):   Biblioteki statyczne VDK
 Group:		X11/Development/Libraries
 Requires:	%{name}-devel = %{version}-%{release}
 
 %description static
 VDK static libraries.
 
-%description static -l pl
+%description static -l pl.UTF-8
 Biblioteki statyczne VDK.
 
 %prep
