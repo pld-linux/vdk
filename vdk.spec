@@ -2,7 +2,6 @@
 # Conditional build:
 %bcond_without	static_libs # don't build static libraries
 #
-%include	/usr/lib/rpm/macros.perl
 Summary:	C++ Wrapper over GTK+ 2.x library
 Summary(pl.UTF-8):	Wrapper C++ dla GTK+ 2.x
 Name:		vdk
