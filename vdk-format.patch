@@ -1,0 +1,11 @@
+--- vdk-2.5.1/src/msgdialog.cc.orig	2010-08-30 12:14:03.000000000 +0200
++++ vdk-2.5.1/src/msgdialog.cc	2024-07-23 20:43:00.242707526 +0200
+@@ -90,7 +90,7 @@ MakeDialog(GtkMessageType type, GtkButto
+ 						GtkDialogFlags(GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT),
+ 						type,
+ 						buttons,
+-						(char*)prompt);
++						"%s", prompt);
+ 	if (!dialog) return NULL;
+ 	if (caption) gtk_window_set_title(GTK_WINDOW(dialog), caption);
+ 	gtk_window_position(GTK_WINDOW(dialog), parent ? GTK_WIN_POS_CENTER_ON_PARENT : GTK_WIN_POS_CENTER);

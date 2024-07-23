@@ -1,22 +1,21 @@
-diff -Nurb o.vdk-2.4.1/configure.in n.vdk-2.4.1/configure.in
---- o.vdk-2.4.1/configure.in	2004-11-06 19:16:43.000000000 +0100
-+++ n.vdk-2.4.1/configure.in	2005-08-28 02:02:50.092475176 +0200
-@@ -2,8 +2,6 @@
+--- vdk-2.5.1/configure.ac.orig	2024-07-23 20:16:48.771220917 +0200
++++ vdk-2.5.1/configure.ac	2024-07-23 20:16:53.034531154 +0200
+@@ -2,8 +2,6 @@ dnl configure.ac for VDK
  AC_PREREQ(2.52)
- AC_INIT(vdk/vdk.h)
+ AC_INIT(include/vdk/vdk.h)
  
 -cflags_set=${CFLAGS+set}
 -
  VDK_VERSION_MAJOR=2
- VDK_VERSION_MINOR=4
+ VDK_VERSION_MINOR=5
  VDK_VERSION_MICRO=1
-@@ -121,28 +119,15 @@
+@@ -135,28 +133,15 @@ AM_CONFIG_HEADER(config.h)
  dnl ==========================
  dnl user configurable options
  dnl ==========================
 -AC_ARG_ENABLE(debug,   [  --enable-debug=[no/minimum/yes]  enable debug information [default=no]],,enable_debug=no)
 -AC_ARG_ENABLE(opt,     [  --enable-opt=[OPTIMIZATION/no]  Compile with -Ox optimization [default=2]],,enable_opt=2)
-+AC_ARG_ENABLE(vdkdebug, [  --enable-vdkdebug=[no/yes]  enable vdkdebug information [default=no]],,enable_debug=no)
++AC_ARG_ENABLE(vdkdebug,[  --enable-vdkdebug=[no/minimum/yes]  enable debug information [default=no]],,enable_debug=no)
  AC_ARG_ENABLE(testvdk, [  --enable-testvdk=[yes/no] Compile testvdk program example [default=yes]],,enable_testvdk=yes)
  dnl doxygen options
  AC_ARG_ENABLE(doc-html,  [ --enable-doc-html[=yes/no] enable generation of docs in html format [default=yes]],,enable_doc_html=yes)
@@ -24,12 +23,12 @@ diff -Nurb o.vdk-2.4.1/configure.in n.vdk-2.4.1/configure.in
  AC_ARG_ENABLE(doc-man,   [ --enable-doc-man[=yes/no] enable generation of docs in latex format [default=no]],,enable_doc_man=no)
  
 -if test "x$enable_debug" = "xminimum"; then
--  AC_DEFINE(VDKDEBUG)
+-  AC_DEFINE([VDKDEBUG], [], [Debug purposes])
 -  CXXFLAGS="-s"
 -else
 -  if test "x$enable_debug" = "xyes"; then
 +if test "x$enable_vdkdebug" = "xyes"; then
-     AC_DEFINE(VDKDEBUG)
+     AC_DEFINE([VDKDEBUG], [], [Debug purposes])
 -    CXXFLAGS="-g"
 -  else
 -    CXXFLAGS="-s"
@@ -41,7 +40,7 @@ diff -Nurb o.vdk-2.4.1/configure.in n.vdk-2.4.1/configure.in
  fi
  
  if test "x$enable_testvdk" = "xyes"; then
-@@ -179,10 +164,6 @@
+@@ -193,10 +178,6 @@ else
  	TAG_SIGC=""
  fi
  
@@ -52,25 +51,13 @@ diff -Nurb o.vdk-2.4.1/configure.in n.vdk-2.4.1/configure.in
  if test "x$enable_doc_latex" = "xyes"; then
  	GENERATE_LATEX=YES
  #	TAG_SIGC=USE_SIGCPLUSPLUS
-diff -Nurb o.vdk-2.4.1/testvdk/Makefile.am n.vdk-2.4.1/testvdk/Makefile.am
---- o.vdk-2.4.1/testvdk/Makefile.am	2004-11-06 18:47:14.000000000 +0100
-+++ n.vdk-2.4.1/testvdk/Makefile.am	2005-08-28 02:45:08.377597184 +0200
-@@ -5,7 +5,6 @@
- EXTRA_PROGRAMS = testvdk testvdkstring
+--- vdk-2.5.1/testvdk/Makefile.am.orig	2024-07-23 20:18:55.017203651 +0200
++++ vdk-2.5.1/testvdk/Makefile.am	2024-07-23 20:19:17.063750881 +0200
+@@ -5,7 +5,6 @@ noinst_PROGRAMS = @TESTVDK@
+ EXTRA_PROGRAMS = testvdk testvdkstring testvdkustring
  
- INCLUDES = @INCLUDES@
+ INCLUDES = -I../include @INCLUDES@
 -AM_CXXFLAGS = @CXXFLAGS@
  
  testvdk_LDFLAGS = $(GTK_LIBS)
- testvdk_LDADD = $(top_srcdir)/vdk/libvdk.la
-diff -Nurb o.vdk-2.4.1/vdk/Makefile.am n.vdk-2.4.1/vdk/Makefile.am
---- o.vdk-2.4.1/vdk/Makefile.am	2004-11-06 18:47:10.000000000 +0100
-+++ n.vdk-2.4.1/vdk/Makefile.am	2005-08-28 02:45:22.032521320 +0200
-@@ -186,7 +186,6 @@
- 		-version-info $(LT_VDK_CURRENT):$(LT_VDK_REVISION):$(LT_VDK_AGE)
- 
- INCLUDES = -I$(top_srcdir)/include @INCLUDES@
--AM_CXXFLAGS = @CXXFLAGS@
- 
- AM_LDFLAGS = $(GTK_CFLAGS) 
- LIBS = $(GTK_LIBS)
+ testvdk_LDADD = $(top_srcdir)/src/libvdk-@VDK_VERSION_MAJOR@.la
