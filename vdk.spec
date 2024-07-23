@@ -17,16 +17,13 @@ URL:		https://vdklib.sourceforkge.net/
 BuildRequires:	autoconf >= 2.52
 BuildRequires:	automake
 BuildRequires:	doxygen
-BuildRequires:	freetype-devel >= 2.0.0
 BuildRequires:	gtk+2-devel >= 2:2.18.0
-BuildRequires:	imlib-devel
 BuildRequires:	libstdc++-devel
 BuildRequires:	libtool >= 2:1.5
 BuildRequires:	perl-devel >= 1:5.6
 BuildRequires:	pkgconfig >= 1:0.8
 BuildRequires:	rpm-build >= 4.6
 BuildRequires:	rpm-perlprov >= 4.1-13
-BuildRequires:	zlib-devel
 Requires:	gtk+2 >= 2:2.18.0
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
